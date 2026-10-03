@@ -60,6 +60,8 @@ The [Release workflow](.github/workflows/release.yml) builds and publishes a pre
 
 The tag must exactly match `v` plus the version in `package.json`. Releases currently use stable versions (`MAJOR.MINOR.PATCH`). Watch **GitHub → Actions → Release** for the result. A release is published only after the checks and archive verification pass. Published releases are left unchanged on reruns; failed runs can be retried from GitHub Actions.
 
+To build an existing tag manually, open **GitHub → Actions → Release → Run workflow** and enter its tag (for example `v1.1.0`). The workflow checks out that tag's source, so retrying never builds unrelated changes from the default branch.
+
 For a local packaging check after building and testing, run `npm run package:release`. The ZIP and checksum are written to `.build/release/`, which is excluded from Git.
 
 ## How it works
