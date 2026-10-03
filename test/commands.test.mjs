@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -107,6 +107,21 @@ test("compiled native helper converts sRGB, clamps extended colors and reports c
     { status: "picked", red: 255, green: 0, blue: 0 },
     { status: "cancelled" },
   ]);
+});
+
+test("native pick and cancel return from the callback before graceful AppKit termination", () => {
+  for (const [outcome, expected] of [
+    ["picked", { status: "picked", red: 255, green: 90, blue: 54 }],
+    ["cancelled", { status: "cancelled" }],
+  ]) {
+    const helper = spawnSync(join(root, "dist/assets/color-sampler"), ["--self-test-session", outcome], {
+      encoding: "utf8", timeout: 10_000,
+    });
+    assert.equal(helper.error, undefined);
+    assert.equal(helper.status, 0, helper.stderr);
+    assert.deepEqual(JSON.parse(helper.stdout), expected);
+    assert.match(helper.stderr, /graceful termination after callback cleanup/);
+  }
 });
 
 test("missing or unrecognized preferences fall back to HEX", async () => {

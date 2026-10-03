@@ -3,7 +3,7 @@
   "name": "tinycast-color-picker",
   "title": "Color Picker",
   "description": "Pick any pixel on your screen and copy its color as HEX or RGB.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "icon": "extension-icon.png",
   "author": "davsanchez",
   "license": "MIT",

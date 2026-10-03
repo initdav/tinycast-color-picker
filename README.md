@@ -68,6 +68,8 @@ For a local packaging check after building and testing, run `npm run package:rel
 
 TinyCast runs the command as a `no-view` extension. It reads the saved format preference, closes the launcher, launches the bundled helper with `child_process.execFile`, validates the sampled color, and copies it through TinyCast's `Clipboard` API. The helper uses Apple's `NSColorSampler`; it does not install a background service, save screenshots, or contact a server.
 
+After picking or cancelling, the helper lets the sampler's callback return and gives AppKit time to release the sampling interface before quitting normally. The clipboard update and confirmation happen after the helper has exited.
+
 If macOS prompts for screen access, follow its permission prompt and rerun the command. If the eyedropper fails to launch, download and reinstall the latest release. Cancelling or a failed sample preserves your clipboard.
 
 References: [TinyCast extensions](https://tinycast.dev/docs/extensions/), [compatibility](https://tinycast.dev/docs/extensions/compatibility/), [folder installation](https://tinycast.dev/docs/extensions/installing/), [Apple NSColorSampler](https://developer.apple.com/documentation/appkit/nscolorsampler).

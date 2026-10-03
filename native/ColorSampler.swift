@@ -43,20 +43,58 @@ if CommandLine.arguments.dropFirst().first == "--self-test" {
     exit(0)
 }
 
+final class SamplingSession: NSObject, NSApplicationDelegate {
+    private var result: Sample?
+    var terminationCheck: (() -> Void)?
+
+    func complete(with color: NSColor?) {
+        guard result == nil else { return }
+        result = color.map { sample(from: $0) } ?? Sample(status: "cancelled")
+
+        // Never exit from NSColorSampler's callback: AppKit still has to unwind
+        // the sampling session and release its screen-wide mouse capture.
+        // Keep the run loop alive briefly for that cleanup, then quit through
+        // NSApplication so its normal termination hooks also run.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            NSApplication.shared.terminate(nil)
+        }
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        terminationCheck?()
+        if let result { emit(result) }
+    }
+}
+
 let app = NSApplication.shared
+let session = SamplingSession()
+app.delegate = session
 app.setActivationPolicy(.accessory)
 app.finishLaunching()
+
+// Exercise the real shutdown path without opening a screen-wide sampler.
+if CommandLine.arguments.dropFirst().first == "--self-test-session" {
+    let picked = CommandLine.arguments.last == "picked"
+    var callbackReturned = false
+    var cleanupRan = false
+    session.terminationCheck = {
+        precondition(callbackReturned && cleanupRan, "Terminated before sampler callback cleanup")
+        FileHandle.standardError.write(Data("graceful termination after callback cleanup\n".utf8))
+    }
+    DispatchQueue.main.async {
+        session.complete(with: picked ? NSColor(srgbRed: 1, green: 90.0 / 255, blue: 54.0 / 255, alpha: 1) : nil)
+        callbackReturned = true
+        DispatchQueue.main.async { cleanupRan = true }
+    }
+    app.run()
+}
+
 let sampler = NSColorSampler()
 
 // Let the launcher's dismissal finish before macOS freezes the screen for sampling.
 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
     sampler.show { color in
-        if let color {
-            emit(sample(from: color))
-        } else {
-            emit(Sample(status: "cancelled"))
-        }
-        exit(0)
+        session.complete(with: color)
     }
 }
 app.run()
