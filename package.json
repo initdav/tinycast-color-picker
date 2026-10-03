@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tinycast-color-picker",
+  "title": "Color Picker",
+  "description": "Pick any pixel on your screen and copy its color as HEX or RGB.",
+  "version": "1.1.0",
+  "icon": "extension-icon.png",
+  "author": "davsanchez",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Design Tools", "Developer Tools"],
+  "commands": [
+    {
+      "name": "pick-color",
+      "title": "Pick Color",
+      "description": "Click a pixel anywhere on your screen and copy its color in your preferred format.",
+      "mode": "no-view",
+      "keywords": ["eyedropper", "pixel", "hex", "rgb", "color", "colour"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "colorFormat",
+      "type": "dropdown",
+      "title": "Color Format",
+      "description": "The format copied to your clipboard when you pick a color.",
+      "required": false,
+      "default": "hex",
+      "data": [
+        { "title": "HEX (#FF5A36)", "value": "hex" },
+        { "title": "RGB (rgb(255, 90, 54))", "value": "rgb" }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "@raycast/api": "2.6.2",
+    "@types/node": "26.6.4",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2"
+  }
+}
